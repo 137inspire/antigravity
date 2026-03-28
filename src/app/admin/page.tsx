@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboard() {
@@ -17,7 +18,10 @@ export default async function AdminDashboard() {
 
   return (
     <div className="container" style={{ padding: "4rem 1.5rem", minHeight: "80vh" }}>
-      <h1 className="section-title" style={{ textAlign: "left" }}>Admin Dashboard</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h1 className="section-title" style={{ margin: 0 }}>Admin Dashboard</h1>
+        <Link href="/admin/products" className="btn-primary" style={{ padding: '0.6rem 1.2rem' }}>Manage Products</Link>
+      </div>
       
       <div style={{ backgroundColor: "var(--surface-color)", padding: "2rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
         <h2 style={{ marginBottom: "1.5rem", color: "var(--eco-green-dark)" }}>Pending Wholesale Applications</h2>
