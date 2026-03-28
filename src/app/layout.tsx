@@ -7,9 +7,11 @@ import { authOptions } from "@/lib/auth";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "Eco Store | Sustainable Wholesale & Retail",
+  title: "Eco Bitex | Sustainable Wholesale & Retail",
   description: "Your go-to eco-friendly shop for organic and sustainable products.",
 };
+
+import Image from "next/image";
 
 export default async function RootLayout({
   children,
@@ -24,8 +26,9 @@ export default async function RootLayout({
         <AuthProvider>
           <nav className="navbar">
             <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Link href="/" className="logo">
-                🌿 Eco Store
+              <Link href="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Image src="/logo.png" alt="Eco Bitex Logo" width={40} height={40} style={{ borderRadius: '50%' }} />
+                Eco Bitex
               </Link>
               <div className="nav-links">
                 <Link href="/products" className="nav-link">Shop</Link>
