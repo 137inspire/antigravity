@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 async function main() {
   const adminEmail = 'admin@ecobitex.com';
-  const adminPassword = 'admin-password-123';
+  const adminPassword = 'admin-reset-2026';
   const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
+    update: { password: hashedPassword },
     create: {
       email: adminEmail,
       name: 'Admin User',
