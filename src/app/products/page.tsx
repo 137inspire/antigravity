@@ -1,16 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
-import { mockProducts } from "@/lib/data";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export const metadata = {
-  title: "Shop All Products | Eco Store",
+  title: "Shop All Products | Eco Bitex",
 };
 
 export default async function ProductsPage() {
   const session = await getServerSession(authOptions);
   const isWholesale = session?.user?.role === "WHOLESALE" && session?.user?.isVerified;
+
+  const products = await prisma.product.findMany({
+    where: { isPublished: true },
+    orderBy: { name: 'asc' }
+  });
 
   return (
     <div className="container" style={{ padding: "4rem 1.5rem" }}>
@@ -20,14 +25,15 @@ export default async function ProductsPage() {
       </p>
       
       <div className="product-grid">
-        {mockProducts.map((product) => {
-          const displayPrice = isWholesale ? product.wholesalePrice : product.price;
+        {products.map((product) => {
+          // Fallback to base price if no wholesale tier is found
+          const displayPrice = isWholesale ? (product as any).wholesalePrice ?? product.price : product.price;
 
           return (
             <div key={product.id} className="product-card">
               <div className="product-image-wrapper">
                 <Image 
-                  src={product.image} 
+                  src={product.image || '/logo.png'} 
                   alt={product.name} 
                   fill 
                   style={{ objectFit: 'cover' }}

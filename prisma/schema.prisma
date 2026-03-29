@@ -34,6 +34,7 @@ model Product {
   image          String?
   price          Float
   weight         Float            @default(0.0)
+  isPublished    Boolean          @default(false)
   wholesaleTiers WholesaleTier[]
   orderItems     OrderItem[]
 }
