@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { mockProducts } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import AddToCartButton from "@/components/AddToCartButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -10,15 +10,29 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const session = await getServerSession(authOptions);
   const isWholesale = session?.user?.role === "WHOLESALE" && session?.user?.isVerified;
 
-  const rawProduct = mockProducts.find(p => p.id === id);
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: { wholesaleTiers: { orderBy: { minQuantity: 'asc' } } }
+  });
 
-  if (!rawProduct) {
+  if (!product || (!product.isPublished && session?.user?.role !== "ADMIN")) {
     notFound();
   }
 
-  const product = {
-    ...rawProduct,
-    price: isWholesale ? rawProduct.wholesalePrice : rawProduct.price
+  // Determine display price
+  let displayPrice = product.price;
+  if (isWholesale && product.wholesaleTiers.length > 0) {
+    displayPrice = product.wholesaleTiers[0].price;
+  }
+
+  const productForCart = {
+    id: product.id,
+    name: product.name,
+    description: product.description || "",
+    image: product.image || "/logo.png",
+    price: displayPrice,
+    wholesalePrice: displayPrice, // Default to displayPrice for cart type compatibility
+    weight: product.weight
   };
 
   return (
@@ -28,7 +42,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {/* Product Image */}
         <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", borderRadius: "12px", overflow: "hidden" }}>
           <Image 
-            src={product.image} 
+            src={product.image || "/logo.png"} 
             alt={product.name} 
             fill 
             style={{ objectFit: 'cover' }}
@@ -39,7 +53,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <h1 style={{ color: "var(--eco-green-dark)", fontSize: "2.5rem", margin: 0 }}>{product.name}</h1>
           <p style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--eco-green)", margin: 0 }}>
-            ${product.price.toFixed(2)}
+            ${displayPrice.toFixed(2)}
             {isWholesale && <span style={{fontSize: '1rem', color: 'var(--text-muted)', marginLeft: '1rem'}}>Wholesale Pricing Applied</span>}
           </p>
           
@@ -52,10 +66,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             Shipping Weight: {product.weight} kg
           </p>
 
-          <AddToCartButton product={product} />
+          <AddToCartButton product={productForCart} />
 
         </div>
       </div>
-    </div>
+    </div> 
   );
 }

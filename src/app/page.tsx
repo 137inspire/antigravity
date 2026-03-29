@@ -1,8 +1,14 @@
 import Link from "next/link";
-import { mockProducts } from "@/lib/data";
 import Image from "next/image";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+export default async function Home() {
+  const featuredProducts = await prisma.product.findMany({
+    where: { isPublished: true },
+    take: 4,
+    orderBy: { name: 'asc' }
+  });
+
   return (
     <>
       <section className="hero">
@@ -22,11 +28,11 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Featured Products</h2>
           <div className="product-grid">
-            {mockProducts.map((product) => (
+            {featuredProducts.map((product) => (
               <div key={product.id} className="product-card">
                 <div className="product-image-wrapper">
                   <Image 
-                    src={product.image} 
+                    src={product.image || '/logo.png'} 
                     alt={product.name} 
                     fill 
                     style={{ objectFit: 'cover' }}

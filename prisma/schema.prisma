@@ -8,13 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  GUEST
-  RETAIL
-  WHOLESALE
-  ADMIN
-}
-
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -28,35 +21,35 @@ model User {
 }
 
 model Product {
-  id             String           @id @default(cuid())
+  id             String          @id @default(cuid())
   name           String
   description    String?
   image          String?
   price          Float
-  weight         Float            @default(0.0)
-  isPublished    Boolean          @default(false)
-  wholesaleTiers WholesaleTier[]
+  weight         Float           @default(0.0)
+  isPublished    Boolean         @default(false)
   orderItems     OrderItem[]
+  wholesaleTiers WholesaleTier[]
 }
 
 model WholesaleTier {
-  id            String   @id @default(cuid())
-  productId     String
-  price         Float
-  minQuantity   Int      @default(1)
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id          String  @id @default(cuid())
+  productId   String
+  price       Float
+  minQuantity Int     @default(1)
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Order {
   id        String      @id @default(cuid())
   userId    String?
-  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   status    String      @default("PENDING")
   total     Float
   shipping  Float       @default(0.0)
-  items     OrderItem[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  user      User?       @relation(fields: [userId], references: [id])
+  items     OrderItem[]
 }
 
 model OrderItem {
@@ -66,5 +59,12 @@ model OrderItem {
   quantity  Int
   price     Float
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+enum Role {
+  GUEST
+  RETAIL
+  WHOLESALE
+  ADMIN
 }
